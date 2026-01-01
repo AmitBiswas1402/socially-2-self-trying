@@ -7,7 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model User {
   id String @id @default(cuid())
   email String @unique
@@ -47,7 +46,6 @@ model Post{
   likes Like[]
   notifications Notification[]
 }
-
 
 model Comment{
   id String @id @default(cuid())
