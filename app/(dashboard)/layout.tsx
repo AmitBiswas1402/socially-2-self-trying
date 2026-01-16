@@ -1,10 +1,10 @@
 import Sidebar from "@/components/Sidebar";
 
-export default function DashboardLayout({
+const DashboardLayout = ({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <div className="flex h-screen">
       <Sidebar />
@@ -12,3 +12,5 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+export default DashboardLayout;
