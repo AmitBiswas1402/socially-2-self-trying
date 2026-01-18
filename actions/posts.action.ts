@@ -2,9 +2,10 @@
 
 import { db } from "@/db";
 import { getDBUserId } from "./users.action"
-import { comments, likes, posts, users } from "@/db/schema";
+import { comments, likes, notifications, posts, users } from "@/db/schema";
 import { revalidatePath } from "next/cache";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export async function createPost(content: string, image: string) {
     try {
@@ -105,5 +106,148 @@ export async function getPosts() {
     } catch (error) {
         console.log("Error in getPosts", error);
         throw new Error("Failed to fetch posts");
+    }
+}
+
+export async function toggleLike(postId: string) {
+    try {
+        const userId = await getDBUserId();
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const existing = await db
+            .select()
+            .from(likes)
+            .where(and(eq(likes.postId, postId), eq(likes.userId, userId)))
+            .limit(1);
+
+        if (existing.length) {
+            await db
+                .delete(likes)
+                .where(and(eq(likes.postId, postId), eq(likes.userId, userId)))
+        } else {
+            await db.transaction(async (tx) => {
+                await tx.insert(likes).values({ postId, userId });
+
+                const [p] = await tx
+                    .select({ authorId: posts.authorId })
+                    .from(posts)
+                    .where(eq(posts.id, postId))
+                    .limit(1);
+
+                if (p && p.authorId !== userId) {
+                    await tx.insert(notifications).values({
+                        type: "LIKE",
+                        userId: p.authorId,
+                        creatorId: userId,
+                        postId,
+                    });
+                }
+            });
+        }
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        console.error("Failed to delete post:", message);
+        return { success: false, error: "Failed to delete post" };
+    }
+}
+
+
+export async function createComment(postId: string, content: string) {
+    try {
+        const userId = await getDBUserId();
+        if (!userId) return { success: false, error: "Unauthorized" };
+
+        const [comment] = await db
+            .insert(comments)
+            .values({
+                content,
+                postId,
+                authorId: userId
+            })
+            .returning();
+
+        const [p] = await db
+            .select({ authorId: posts.authorId })
+            .from(posts)
+            .where(eq(posts.id, postId))
+            .limit(1);
+
+        if (p && p.authorId !== userId) {
+            await db.insert(notifications).values({
+                type: "COMMENT",
+                userId: p.authorId,
+                creatorId: userId,
+                postId,
+                commentId: comment.id,
+            });
+        }
+
+        revalidatePath("/");
+        return { success: true, comment };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        console.error("Failed to delete post:", message);
+        return { success: false, error: "Failed to delete post" };
+    }
+}
+
+export async function deletePost(postId: string) {
+    try {
+        const userId = await getDBUserId();
+
+        const [post] = await db
+            .select({ authorId: posts.authorId })
+            .from(posts)
+            .where(eq(posts.id, postId))
+            .limit(1);
+
+        if (!post) return { success: false, error: "Post not found" };
+
+        if (post.authorId !== userId)
+            return { success: false, error: "Unauthorized - no delete permission" };
+
+        await db
+            .delete(posts)
+            .where(and(eq(posts.id, postId), eq(posts.authorId, userId)));
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        console.error("Failed to delete post:", message);
+        return { success: false, error: "Failed to delete post" };
+    }
+}
+
+export async function deleteComment(commentId: string) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) return { success: false, error: "Unauthorized" };
+
+        const [user] = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.clerkId, clerkId))
+            .limit(1);
+
+        if (!user) return { success: false, error: "User not found" };
+
+        await db
+            .delete(comments)
+            .where(
+                and(
+                    eq(comments.id, commentId),
+                    eq(comments.authorId, user.id)
+                )
+            );
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        console.log("Delete comment error", error);
+        return { success: false, error: "Failed to delete comment" };
     }
 }
