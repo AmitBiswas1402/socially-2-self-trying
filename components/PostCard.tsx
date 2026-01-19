@@ -109,9 +109,9 @@ const PostCard = ({ post, dbUserId }: { post: Post; dbUserId: string | null }) =
     }
 
     return (
-        <Card className="overflow-hidden">
-            <CardContent className="p-4 sm:p-6">
-                <div className="space-y-4">
+        <Card className="bg-transparent border shadow-none rounded-none">
+            <CardContent className="p-0">
+                <div className="px-4 pt-3 pb-2">
                     <div className="flex space-x-3 sm:space-x-4">
                         <Link href={`/profile/${post.author.username}`}>
                             <Avatar className="size-8 sm:w-10 sm:h-10">
@@ -122,24 +122,13 @@ const PostCard = ({ post, dbUserId }: { post: Post; dbUserId: string | null }) =
                         {/* POST HEADER & TEXT CONTENT */}
                         <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 truncate">
-                                    <Link
-                                        href={`/profile/${post.author.username}`}
-                                        className="font-semibold truncate"
-                                    >
-                                        {post.author.fullName ?? post.author.username}
-                                    </Link>
-                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                        <Link href={`/profile/${post.author.username}`}>
-                                            @{post.author.username}
-                                        </Link>
-                                        <span>•</span>
-                                        <span>
-                                            {formatDistanceToNow(new Date(post.createdAt))} ago
-                                        </span>
-                                    </div>
-                                </div>
-                                {/* Check if current user is the post author */}
+                                <Link
+                                    href={`/profile/${post.author.username}`}
+                                    className="font-semibold text-white"
+                                >
+                                    {post.author.username}
+                                </Link>
+
                                 {dbUserId === post.author.id && (
                                     <DeleteAlertDialog
                                         isDeleting={isDeleting}
@@ -147,32 +136,36 @@ const PostCard = ({ post, dbUserId }: { post: Post; dbUserId: string | null }) =
                                     />
                                 )}
                             </div>
-                            <p className="mt-2 text-sm text-foreground wrap-break-words">
-                                {post.content}
-                            </p>
+
+                            {/* Caption */}
+                            {post.content && (
+                                <p className="-mt-0.5 text-sm text-zinc-300 leading-snug">
+                                    {post.content}
+                                </p>
+                            )}
                         </div>
                     </div>
 
                     {/* POST IMAGE */}
                     {post.image && (
-                        <div className="rounded-lg overflow-hidden">
+                        <div className="w-full bg-black">
                             <img
                                 src={post.image}
                                 alt="Post content"
-                                className="w-full h-auto object-cover"
+                                className="w-full h-auto object-contain"
                             />
                         </div>
                     )}
 
                     {/* LIKE & COMMENT BUTTONS */}
-                    <div className="flex items-center pt-2 space-x-4">
+                    <div className="px-4 pt-3 pb-4">
                         {user ? (
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 className={`text-muted-foreground gap-2 ${hasLiked
-                                        ? "text-red-500 hover:text-red-600"
-                                        : "hover:text-red-500"
+                                    ? "text-red-500 hover:text-red-600"
+                                    : "hover:text-red-500"
                                     }`}
                                 onClick={handleLike}
                             >
