@@ -2,19 +2,19 @@
 
 import SidebarItem from "./SidebarItem";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Home, PlusSquare, Bell } from "lucide-react";
+import { Home, PlusSquare, Bell, User } from "lucide-react";
 
 type SidebarItemType = {
   label: string;
   href: string;
-  icon: "home" | "create" | "notifications";
+  icon: "home" | "create" | "notifications" | "profile";
 };
 
 const ICON_MAP = {
   home: Home,
-  
   create: PlusSquare,
   notifications: Bell,
+  profile: User
 };
 
 const SidebarClient = ({

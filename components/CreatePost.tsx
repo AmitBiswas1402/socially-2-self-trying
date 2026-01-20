@@ -25,7 +25,7 @@ const CreatePost = () => {
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  /* ---------- Cloudinary upload ---------- */
+  // Cloudinary upload 
   const uploadImage = async (file: File) => {
     const reader = new FileReader();
 
@@ -64,7 +64,7 @@ const CreatePost = () => {
     }
   };
 
-  /* ---------- Submit post ---------- */
+  // Submit Post
   const handleSubmit = async () => {
     if (!content.trim() || !imageURL) {
       toast.error("Image and caption required");
@@ -121,7 +121,7 @@ const CreatePost = () => {
                 text-white
                 placeholder:text-zinc-500
                 focus-visible:ring-0
-                min-h-[80px]
+                min-h-20
               "
             />
           </div>
@@ -136,7 +136,7 @@ const CreatePost = () => {
                     alt="Preview"
                     width={800}
                     height={800}
-                    className="w-full max-h-[420px] object-cover"
+                    className="w-full max-h-105 object-cover"
                   />
 
                   <button
@@ -159,7 +159,7 @@ const CreatePost = () => {
                 <label
                   className="
                     flex flex-col items-center justify-center
-                    h-[220px]
+                    h-55
                     cursor-pointer
                     text-zinc-400
                     hover:text-white

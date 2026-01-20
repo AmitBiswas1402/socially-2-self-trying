@@ -1,9 +1,10 @@
 "use server"
 
 import { db } from "@/db";
-import { follows, users } from "@/db/schema";
+import { follows, notifications, users } from "@/db/schema";
 import { auth, currentUser } from "@clerk/nextjs/server"
-import { eq, sql } from "drizzle-orm";
+import { and, eq, not, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export async function syncUser() {
     const { userId } = await auth();
@@ -81,4 +82,97 @@ export async function getDBUserId() {
     }
 
     return user.id;
+}
+
+export async function getRandomUsers() {
+  try {
+    const userId = await getDBUserId();
+    if (!userId) return [];
+
+    const randomUsers = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        image: users.image,
+        followersCount: sql<number>`count(${follows.followerId})`,
+      })
+      .from(users)
+      .leftJoin(
+        follows,
+        eq(follows.followingId, users.id)
+      )
+      .where(
+        and(
+          not(eq(users.id, userId)),
+          not(
+            sql`${users.id} IN (
+              SELECT following_id FROM follows WHERE follower_id = ${userId}
+            )`
+          )
+        )
+      )
+      .groupBy(users.id)
+      .orderBy(sql`random()`)
+      .limit(3);
+
+    return randomUsers;
+  } catch (error) {
+    console.log("Error fetching random users", error);
+    return [];
+  }
+}
+
+export async function toggleFollow(targetUserId: string) {
+  try {
+    const userId = await getDBUserId();
+    if (!userId) return;
+
+    if (userId === targetUserId) {
+      throw new Error("You cannot follow yourself");
+    }
+
+    const existing = await db
+      .select()
+      .from(follows)
+      .where(
+        and(
+          eq(follows.followerId, userId),
+          eq(follows.followingId, targetUserId)
+        )
+      )
+      .limit(1);
+
+    if (existing.length) {
+      // UNFOLLOW
+      await db
+        .delete(follows)
+        .where(
+          and(
+            eq(follows.followerId, userId),
+            eq(follows.followingId, targetUserId)
+          )
+        );
+    } else {
+      // FOLLOW + NOTIFICATION (transaction)
+      await db.transaction(async (tx) => {
+        await tx.insert(follows).values({
+          followerId: userId,
+          followingId: targetUserId,
+        });
+
+        await tx.insert(notifications).values({
+          type: "FOLLOW",
+          userId: targetUserId,
+          creatorId: userId,
+        });
+      });
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.log("Error in toggleFollow", error);
+    return { success: false, error: "Error toggling follow" };
+  }
 }
