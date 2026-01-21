@@ -7,7 +7,7 @@ const HomePage = async () => {
   const dbUserId = await getDBUserId();
   return (
     <div className="w-full flex justify-start">
-      <div className="w-[72%] max-w-[700px] ml-24 space-y-12">
+      <div className="w-[72%] max-w-175 ml-24 space-y-12">
         {posts.map((post) => (
           <PostCard
             key={post.id}

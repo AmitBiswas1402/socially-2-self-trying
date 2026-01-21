@@ -5,11 +5,13 @@ import SidebarClient from "./SidebarClient";
 const Sidebar = async () => {
   const user = await currentUser();
 
+  const username = user?.username ?? user?.emailAddresses?.[0]?.emailAddress?.split("@")[0];
+
   const SIDEBAR_ITEMS = [
     { label: "Home", href: "/", icon: "home" },
     { label: "Create", href: "/create", icon: "create" },
     { label: "Notifications", href: "/notifications", icon: "notifications" },
-    { label: "Profile", href: `/profile/${user?.username}`, icon: "profile" },
+    { label: "Profile", href: `/profile/${username}`, icon: "profile" },
   ] as const;
 
   if (user) {

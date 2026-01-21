@@ -3,6 +3,8 @@
 import SidebarItem from "./SidebarItem";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Home, PlusSquare, Bell, User } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 type SidebarItemType = {
   label: string;
@@ -27,7 +29,10 @@ const SidebarClient = ({
   return (
     <aside className="flex h-screen w-64 flex-col border-r px-4 py-6">
       {/* Logo */}
-      <div className="mb-8 px-2 text-2xl font-semibold">Logo</div>
+      <Link href={'/'} className="flex items-center gap-2 mb-6 px-7">
+        <Image src={'/logo.svg'} alt="Logo" width={40} height={40} />
+        <span className="text-xl font-bold tracking-tight">Picsta Social</span>
+      </Link>
 
       {/* Menu */}
       <nav className="flex flex-col gap-2">

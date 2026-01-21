@@ -4,6 +4,7 @@ import { getPosts } from "@/actions/posts.action";
 import { getProfileByUsername, updateProfile } from "@/actions/profile.action";
 import { toggleFollow } from "@/actions/users.action";
 import PostCard from "@/components/PostCard";
+import ProfilePostGrid from "@/components/ProfilePostGrid";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,19 +17,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { SignInButton, useUser } from "@clerk/nextjs";
-import {
-  EditIcon,
-  FileTextIcon,
-  HeartIcon,
-} from "lucide-react";
+import { EditIcon, FileTextIcon, HeartIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -84,9 +76,7 @@ const ProfileClient = ({
 
   const handleEditSubmit = async () => {
     const formData = new FormData();
-    Object.entries(editForm).forEach(([k, v]) =>
-      formData.append(k, v)
-    );
+    Object.entries(editForm).forEach(([k, v]) => formData.append(k, v));
 
     const res = await updateProfile(formData);
     if (res.success) {
@@ -108,9 +98,7 @@ const ProfileClient = ({
         <div className="flex-1 space-y-4">
           {/* USERNAME + BUTTON */}
           <div className="flex items-center gap-4 flex-wrap">
-            <h1 className="text-xl font-semibold">
-              {user.username}
-            </h1>
+            <h1 className="text-xl font-semibold">{user.username}</h1>
 
             {!currentUser ? (
               <SignInButton mode="modal">
@@ -140,30 +128,21 @@ const ProfileClient = ({
           {/* STATS */}
           <div className="flex gap-8 text-sm">
             <div>
-              <span className="font-semibold">
-                {user.postsCount}
-              </span>{" "}
-              posts
+              <span className="font-semibold">{user.postsCount}</span> posts
             </div>
             <div>
-              <span className="font-semibold">
-                {user.followersCount}
-              </span>{" "}
+              <span className="font-semibold">{user.followersCount}</span>{" "}
               followers
             </div>
             <div>
-              <span className="font-semibold">
-                {user.followingCount}
-              </span>{" "}
+              <span className="font-semibold">{user.followingCount}</span>{" "}
               following
             </div>
           </div>
 
           {/* BIO */}
           <div className="text-sm space-y-1 max-w-md">
-            {user.name && (
-              <div className="font-medium">{user.name}</div>
-            )}
+            {user.name && <div className="font-medium">{user.name}</div>}
             {user.bio && <p>{user.bio}</p>}
             {user.website && (
               <a
@@ -204,33 +183,21 @@ const ProfileClient = ({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="posts" className="mt-8 space-y-10">
+        <TabsContent value="posts" className="mt-8">
           {posts.length > 0 ? (
-            posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                dbUserId={user.id}
-              />
-            ))
+            <ProfilePostGrid posts={posts} />
           ) : (
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground py-12">
               No posts yet
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="likes" className="mt-8 space-y-10">
+        <TabsContent value="likes" className="mt-8">
           {likedPosts.length > 0 ? (
-            likedPosts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                dbUserId={user.id}
-              />
-            ))
+            <ProfilePostGrid posts={likedPosts} />
           ) : (
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground py-12">
               No liked posts
             </div>
           )}
@@ -289,9 +256,7 @@ const ProfileClient = ({
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleEditSubmit}>
-              Save Changes
-            </Button>
+            <Button onClick={handleEditSubmit}>Save Changes</Button>
           </div>
         </DialogContent>
       </Dialog>
