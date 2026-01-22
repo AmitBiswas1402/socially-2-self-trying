@@ -1,5 +1,6 @@
 import { getPostById } from "@/actions/posts.action";
 import PostDetailClient from "./PostDetailClient";
+import { getDBUserId } from "@/actions/users.action";
 
 interface PageProps {
   params: Promise<{
@@ -10,6 +11,7 @@ interface PageProps {
 const PostPage = async ({ params }: PageProps) => {
   const { postid } = await params;
   const post = await getPostById(postid);
+  const dbUserId = await getDBUserId();
 
   if (!post) {
     return (
@@ -19,7 +21,7 @@ const PostPage = async ({ params }: PageProps) => {
     );
   }
 
-  return <PostDetailClient post={post} />;
+  return <PostDetailClient post={post} dbUserId={dbUserId} />;
 };
 
 export default PostPage;

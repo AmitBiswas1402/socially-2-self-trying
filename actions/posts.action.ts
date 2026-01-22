@@ -292,16 +292,17 @@ export async function getPostById(postId: string) {
     .where(eq(comments.postId, postId))
     .orderBy(desc(comments.createdAt));
 
-  const likesCount = await db
-    .select({ count: likes.id })
+  const postLikes = await db
+    .select({ userId: likes.userId })
     .from(likes)
     .where(eq(likes.postId, postId));
 
   return {
     ...post,
     comments: postComments,
+    likes: postLikes,
     _count: {
-      likes: likesCount.length,
+      likes: postLikes.length,
     },
   };
 }
