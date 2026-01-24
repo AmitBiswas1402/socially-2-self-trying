@@ -9,6 +9,7 @@ const Sidebar = async () => {
 
   const SIDEBAR_ITEMS = [
     { label: "Home", href: "/", icon: "home" },
+    { label: "Search", href: "/search", icon: "search" },
     { label: "Create", href: "/create", icon: "create" },
     { label: "Notifications", href: "/notifications", icon: "notifications" },
     { label: "Profile", href: `/profile/${username}`, icon: "profile" },
