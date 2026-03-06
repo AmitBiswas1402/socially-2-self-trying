@@ -7,7 +7,13 @@ import {
   deletePost,
   toggleLike,
 } from "@/actions/posts.action";
-import { HeartIcon, MessageCircleIcon, SendIcon, X } from "lucide-react";
+import { HeartIcon, MessageCircleIcon, MoreVertical, SendIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -173,14 +179,25 @@ const PostDetailClient = ({ post, dbUserId }: PostDetailClientProps) => {
                 </div>
 
                 {dbUserId === comment.author.id && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-zinc-400 hover:text-red-500"
-                    onClick={() => setCommentToDelete(comment.id)}
-                  >
-                    <X className="size-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-zinc-400 hover:text-white"
+                      >
+                        <MoreVertical className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-700">
+                      <DropdownMenuItem
+                        className="text-red-500 focus:text-red-500 cursor-pointer"
+                        onClick={() => setCommentToDelete(comment.id)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
             ))}
@@ -189,29 +206,25 @@ const PostDetailClient = ({ post, dbUserId }: PostDetailClientProps) => {
           {/* ACTIONS */}
           <div className="p-4 border-t border-zinc-800 space-y-2">
             {/* ACTION ROW */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-4">
               {/* LIKE */}
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={handleLike}
-                className={`p-0 ${
+                className={`flex items-center gap-1 ${
                   hasLiked ? "text-red-500" : "text-white hover:text-red-500"
                 }`}
               >
                 <HeartIcon
                   className={`h-6 w-6 ${hasLiked ? "fill-current" : ""}`}
                 />
-              </Button>
+                <span className="text-sm font-semibold">{optimisticLikes}</span>
+              </button>
 
               {/* COMMENT */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="p-0 text-white hover:text-zinc-300"
-              >
+              <div className="flex items-center gap-1 text-white">
                 <MessageCircleIcon className="h-6 w-6" />
-              </Button>
+                <span className="text-sm font-semibold">{post.comments.length}</span>
+              </div>
             </div>
 
             {/* TIME */}

@@ -6,7 +6,7 @@ import { Home, PlusSquare, Bell, User, Search, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { searchUsers } from "@/actions/search.action";
 
@@ -128,12 +128,14 @@ const SidebarClient = ({
             <DrawerTitle>Search</DrawerTitle>
 
             {/* ❌ Clear / Close */}
-            <button
-              onClick={clearSearch}
-              className="text-zinc-400 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <DrawerClose asChild>
+              <button
+                onClick={clearSearch}
+                className="text-zinc-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </DrawerClose>
           </DrawerHeader>
 
           <div className="px-4 space-y-4">
